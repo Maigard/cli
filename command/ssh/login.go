@@ -82,6 +82,7 @@ $ step ssh login --principal admin --principal bob bob@smallstep.com
 			flags.CaURL,
 			flags.Root,
 			flags.Context,
+			sshConfirmBeforeUse,
 		},
 	}
 }
@@ -106,6 +107,7 @@ func loginAction(ctx *cli.Context) error {
 	token := ctx.String("token")
 	isAddUser := ctx.Bool("add-user")
 	force := ctx.Bool("force")
+	confirmBeforeUse := ctx.Bool("confirm-before-use")
 	validAfter, validBefore, err := flags.ParseTimeDuration(ctx)
 	if err != nil {
 		return err
@@ -248,7 +250,7 @@ func loginAction(ctx *cli.Context) error {
 	}
 
 	// Attempt to add key to agent if private key defined.
-	if err := agent.AddCertificate(subject, resp.Certificate.Certificate, priv); err != nil {
+	if err := agent.AddCertificate(subject, resp.Certificate.Certificate, priv, confirmBeforeUse); err != nil {
 		ui.Printf(`{{ "%s" | red }} {{ "SSH Agent:" | bold }} %v`+"\n", ui.IconBad, err)
 	} else {
 		ui.PrintSelected("SSH Agent", "yes")
@@ -256,7 +258,7 @@ func loginAction(ctx *cli.Context) error {
 	if isAddUser {
 		if resp.AddUserCertificate == nil {
 			ui.Printf(`{{ "%s" | red }} {{ "Add User Certificate:" | bold }} failed to create a provisioner certificate`+"\n", ui.IconBad)
-		} else if err := agent.AddCertificate(subject, resp.AddUserCertificate.Certificate, auPriv); err != nil {
+		} else if err := agent.AddCertificate(subject, resp.AddUserCertificate.Certificate, auPriv, confirmBeforeUse); err != nil {
 			ui.Printf(`{{ "%s" | red }} {{ "Add User Certificate:" | bold }} %v`+"\n", ui.IconBad, err)
 		} else {
 			ui.PrintSelected("Add User Certificate", "yes")

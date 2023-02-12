@@ -185,6 +185,7 @@ $ step ssh certificate --token $TOKEN mariano@work id_ecdsa
 			flags.CaURL,
 			flags.Root,
 			flags.Context,
+			sshConfirmBeforeUse,
 		},
 	}
 }
@@ -213,6 +214,7 @@ func certificateAction(ctx *cli.Context) error {
 	provisionerPasswordFile := ctx.String("provisioner-password-file")
 	noPassword := ctx.Bool("no-password")
 	insecure := ctx.Bool("insecure")
+	confirmBeforeUse := ctx.Bool("confirm-before-use")
 	sshPrivKeyFile := ctx.String("private-key")
 	validAfter, validBefore, err := flags.ParseTimeDuration(ctx)
 	if err != nil {
@@ -480,7 +482,7 @@ func certificateAction(ctx *cli.Context) error {
 			ui.Printf(`{{ "%s" | red }} {{ "SSH Agent:" | bold }} %v`+"\n", ui.IconBad, err)
 		} else {
 			defer agent.Close()
-			if err := agent.AddCertificate(subject, resp.Certificate.Certificate, priv); err != nil {
+			if err := agent.AddCertificate(subject, resp.Certificate.Certificate, priv, confirmBeforeUse); err != nil {
 				ui.Printf(`{{ "%s" | red }} {{ "SSH Agent:" | bold }} %v`+"\n", ui.IconBad, err)
 			} else {
 				ui.PrintSelected("SSH Agent", "yes")

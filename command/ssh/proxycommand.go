@@ -61,6 +61,7 @@ This command will add the user to the ssh-agent if necessary.
 			flags.CaURL,
 			flags.Root,
 			flags.Context,
+			sshConfirmBeforeUse,
 		},
 	}
 }
@@ -209,8 +210,9 @@ func doLoginIfNeeded(ctx *cli.Context, subject string) error {
 		}
 	}
 
+	confirmBeforeUse := ctx.Bool("confirm-before-use")
 	// Add certificate and private key to agent
-	return agent.AddCertificate(subject, resp.Certificate.Certificate, priv)
+	return agent.AddCertificate(subject, resp.Certificate.Certificate, priv, confirmBeforeUse)
 }
 
 func getBastion(ctx *cli.Context, user, host string) (*api.SSHBastionResponse, error) {

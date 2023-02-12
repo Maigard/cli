@@ -157,6 +157,11 @@ var (
 		Usage: `When signing an existing public key, use this flag to specify the corresponding
 private key so that the pair can be added to an SSH Agent.`,
 	}
+
+	sshConfirmBeforeUse = cli.BoolFlag{
+		Name:  "confirm-before-use",
+		Usage: `Indicates to the SSH Agent that the certificate should be subject to confirmation before being used for authentication.`,
+	}
 )
 
 func loginOnUnauthorized(ctx *cli.Context) (ca.RetryFunc, error) {
@@ -231,9 +236,10 @@ func loginOnUnauthorized(ctx *cli.Context) (ca.RetryFunc, error) {
 			return fail(err)
 		}
 
+		confirmBeforeUse := ctx.Bool("confirm-before-use")
 		// Add ssh certificate to the agent, ignore errors.
 		if agent, err := sshutil.DialAgent(); err == nil {
-			agent.AddCertificate(jwt.Payload.Email, resp.Certificate.Certificate, priv)
+			agent.AddCertificate(jwt.Payload.Email, resp.Certificate.Certificate, priv, confirmBeforeUse)
 		}
 
 		return true

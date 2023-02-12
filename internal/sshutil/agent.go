@@ -241,7 +241,7 @@ func (a *Agent) RemoveAllKeys(opts ...AgentOption) (bool, error) {
 }
 
 // AddCertificate adds the given certificate to the agent.
-func (a *Agent) AddCertificate(subject string, cert *ssh.Certificate, priv interface{}) error {
+func (a *Agent) AddCertificate(subject string, cert *ssh.Certificate, priv interface{}, confirmBeforeUse bool) error {
 	var (
 		lifetime uint64
 		now      = uint64(time.Now().Unix())
@@ -262,9 +262,10 @@ func (a *Agent) AddCertificate(subject string, cert *ssh.Certificate, priv inter
 	}
 
 	return errors.Wrap(a.Add(agent.AddedKey{
-		PrivateKey:   priv,
-		Certificate:  cert,
-		Comment:      subject,
-		LifetimeSecs: uint32(lifetime),
+		PrivateKey:       priv,
+		Certificate:      cert,
+		Comment:          subject,
+		ConfirmBeforeUse: true,
+		LifetimeSecs:     uint32(lifetime),
 	}), "error adding key to agent")
 }
